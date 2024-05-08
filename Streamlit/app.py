@@ -16,11 +16,11 @@ else:
 
 
 # Paths to the models and other resources
-FACE_MODEL_PATH = 'https://drive.google.com/file/d/1Q_175Sdf1bUC7e1HH2Xazta80H2mRafk/view?usp=share_link'
-VOICE_MODEL_JSON_PATH = 'https://drive.google.com/file/d/1IL1AfumIu4zW4o_KBg5fpaH8gJvirK5J/view?usp=share_link'
-VOICE_MODEL_WEIGHTS_PATH = 'https://drive.google.com/file/d/1cFHZg0hVU_-D0CS-xpFlogLGuqIJrXNP/view?usp=share_link'
-ENCODER_PATH = 'https://drive.google.com/file/d/1R2EE7JGToN0rBGEilx5ORB6Euy-wVH_I/view?usp=share_link'
-SCALER_PATH = 'https://drive.google.com/file/d/1aqLszOAO_gGw_qzgW9MjMflKbfYPQkq1/view?usp=share_link'
+FACE_MODEL_PATH = 'drive.google.com/file/d/1Q_175Sdf1bUC7e1HH2Xazta80H2mRafk/view?usp=share_link'
+VOICE_MODEL_JSON_PATH = 'drive.google.com/file/d/1IL1AfumIu4zW4o_KBg5fpaH8gJvirK5J/view?usp=share_link'
+VOICE_MODEL_WEIGHTS_PATH = 'drive.google.com/file/d/1cFHZg0hVU_-D0CS-xpFlogLGuqIJrXNP/view?usp=share_link'
+ENCODER_PATH = 'drive.google.com/file/d/1R2EE7JGToN0rBGEilx5ORB6Euy-wVH_I/view?usp=share_link'
+SCALER_PATH = 'drive.google.com/file/d/1aqLszOAO_gGw_qzgW9MjMflKbfYPQkq1/view?usp=share_link'
 
 # Load and prepare the face recognition model
 def load_face_model():
