@@ -1,31 +1,46 @@
-import streamlit as st
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
 import os
 import json
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+import streamlit as st
 
-# Load credentials from environment variable
-credentials_content = os.environ.get('GOOGLE_DRIVE_CREDENTIALS', '{}')
-with open('credentials.json', 'w') as f:
-    f.write(credentials_content)
+# Load credentials JSON content from environment variable
+credentials_content = os.getenv('GOOGLE_DRIVE_CREDENTIALS', '{}')
+try:
+    credentials_json = json.loads(credentials_content)
+except json.JSONDecodeError:
+    st.error("Error: Invalid credentials JSON format. Check your credentials environment variable.")
+    st.stop()
+
+# Save the JSON to a file if necessary
+credentials_file = 'credentials.json'
+with open(credentials_file, 'w') as f:
+    json.dump(credentials_json, f)
 
 # Authenticate and initialize PyDrive
 gauth = GoogleAuth()
-gauth.LoadCredentialsFile('credentials.json')
-if not gauth.credentials:
-    gauth.LocalWebserverAuth()  # Will open a browser for authentication
-else:
-    gauth.Authorize()
+try:
+    gauth.LoadCredentialsFile(credentials_file)
+    if not gauth.credentials:
+        gauth.LocalWebserverAuth()  # Opens a browser for authentication if needed
+    else:
+        gauth.Authorize()
+except Exception as e:
+    st.error(f"Authentication Error: {e}")
+    st.stop()
+
 drive = GoogleDrive(gauth)
 
-# Google Drive folder ID (found in the URL)
+# Google Drive folder ID (replace with your specific folder ID)
 folder_id = "1ybZf0-PN3AmC39GnaPJGAalX0f9ha2IS"
-
-# Fetch all files from the specified folder
 query = f"'{folder_id}' in parents and trashed=false"
-file_list = drive.ListFile({'q': query}).GetList()
+try:
+    file_list = drive.ListFile({'q': query}).GetList()
+except Exception as e:
+    st.error(f"Error accessing Google Drive folder: {e}")
+    st.stop()
 
-# Display the files in Streamlit
+# Display files in Streamlit
 st.write(f"Files in Google Drive Folder ID: {folder_id}")
 for file in file_list:
     st.write(f"{file['title']} ({file['id']})")
