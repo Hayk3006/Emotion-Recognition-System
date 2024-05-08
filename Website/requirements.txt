@@ -1,6 +1,0 @@
-tensorflow
-librosa
-numpy
-pickle-mixin
-Pillow
-streamlit
