@@ -1,9 +1,48 @@
+import zipfile
+
+# Specify the name of the uploaded zip file
+zip_file_name = '/content/drive/MyDrive/Capstone(Face, Speech, Recorder).zip'
+
+# Specify the directory where you want to extract the contents
+extract_dir = '/content/Models'
+
+# Extract the contents of the zip file
+with zipfile.ZipFile(zip_file_name, 'r') as zip_ref:
+    zip_ref.extractall(extract_dir)
+
+# Optionally, you can print a message to confirm that the extraction was successful
+print("Extraction complete.")
+
+
 import streamlit as st
+import zipfile
 import tensorflow as tf
-import librosa
+from tensorflow.keras.models import load_model
+from tensorflow.keras.optimizers import Adamax
+from PIL import Image
+import cv2
 import numpy as np
+import librosa
 import pickle
-from PIL import Image, ImageOps
+from base64 import b64decode
+from IPython.display import display, Javascript, Image as IPythonImage
+
+# Load and prepare the face recognition model
+def load_face_model():
+    model = load_model('/content/drive/MyDrive/face_recognition.h5', compile=False)
+    model.compile(Adamax(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+# Predict emotion from an image
+def predict_emotion(image_path, model):
+    image = Image.open(image_path)
+    img = image.resize((224, 224))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, 0)
+    predictions = model.predict(img_array)
+    class_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
+    score = tf.nn.softmax(predictions[0])
+    return class_labels[np.argmax(score)]
 
 # Load the voice recognition model from JSON file
 def load_voice_model(json_path, weights_path):
@@ -11,11 +50,8 @@ def load_voice_model(json_path, weights_path):
         loaded_model_json = json_file.read()
     loaded_model = tf.keras.models.model_from_json(loaded_model_json)
     loaded_model.load_weights(weights_path)
+    print("Loaded voice model from disk")
     return loaded_model
-
-# Load the face recognition model from an .h5 file
-def load_face_model(h5_path):
-    return tf.keras.models.load_model(h5_path)
 
 # Load data using pickle (for scalers and encoders)
 def load_pickle(path):
@@ -31,7 +67,7 @@ def rmse(data, frame_length=2048, hop_length=512):
     rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=hop_length)
     return np.squeeze(rmse)
 
-def mfcc(data, sr, frame_length=2048, hop_length=512, flatten=True):
+def mfcc(data, sr, frame_length=2048, hop_length=512, flatten: bool = True):
     mfccs = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=20, hop_length=hop_length, n_fft=frame_length)
     return np.squeeze(mfccs.T) if not flatten else np.ravel(mfccs.T)
 
@@ -59,57 +95,50 @@ def voice_prediction(model, audio_path, scaler):
     emotions = {0: 'Neutral', 1: 'Calm', 2: 'Happy', 3: 'Sad', 4: 'Angry', 5: 'Fear', 6: 'Disgust', 7: 'Surprise'}
     return emotions[y_pred[0]]
 
-# Load and flip image using Pillow
-def flip_image_pillow(image_path):
-    image = Image.open(image_path)
-    flipped_image = ImageOps.mirror(image)  # Horizontal flip
-    return flipped_image
+# Main processing function to analyze both image and audio
+def process_image_and_audio(image_path, audio_path):
+    face_model = load_face_model()
+    face_emotion = predict_emotion(image_path, face_model)
+    st.write(f"Detected Face Emotion: {face_emotion}")
 
-# Placeholder function to predict face emotion (replace with actual implementation)
-def predict_emotion(image_path, model):
-    # Placeholder implementation - replace with your actual prediction logic
-    return "Happy"
+    voice_model = load_voice_model('/content/Models/Speech Recognition/Model/CNN_model.json', '/content/Models/Speech Recognition/Model/CNN_model_weights.h5')
+    scaler2 = load_pickle('/content/drive/MyDrive/scaler2.pickle')
 
-# Process image and audio paths
-def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path, audio_path):
-    face_emotion = predict_emotion(image_path, face_emotion_model)
-    voice_emotion = voice_prediction(voice_model, audio_path, scaler)
+    voice_emotion = voice_prediction(voice_model, audio_path, scaler2)
+    st.write(f"Detected Voice Emotion: {voice_emotion}")
 
-    result = {
-        "Face Emotion": face_emotion,
-        "Voice Emotion": voice_emotion
-    }
-    return result
-
-# Streamlit user interface
-st.title("Emotion Detection from Image and Audio")
-st.header("Upload your image and audio files")
-
-# Load models and scaler
-face_model = load_face_model('/content/drive/MyDrive/face_recognition.h5')
-voice_model = load_voice_model('/content/drive/MyDrive/CNN_model.json', '/content/drive/MyDrive/CNN_model_weights.h5')
-scaler2 = load_pickle('/content/drive/MyDrive/scaler2.pickle')
-
-uploaded_image = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
-uploaded_audio = st.file_uploader("Choose an audio file", type=["wav", "mp3", "flac"])
-
-if st.button("Analyze Emotions"):
-    if uploaded_image is not None and uploaded_audio is not None:
-        # Save uploaded files to a temporary location
-        image_path = f"temp_{uploaded_image.name}"
-        with open(image_path, "wb") as f:
-            f.write(uploaded_image.read())
-        audio_path = f"temp_{uploaded_audio.name}"
-        with open(audio_path, "wb") as f:
-            f.write(uploaded_audio.read())
-
-        # Optionally, flip the uploaded image horizontally using Pillow
-        flipped_image = flip_image_pillow(image_path)
-        flipped_image.save(image_path)
-
-        # Process emotions
-        results = process_image_and_audio(face_model, voice_model, scaler2, image_path, audio_path)
-        st.write(f"Detected Face Emotion: {results['Face Emotion']}")
-        st.write(f"Detected Voice Emotion: {results['Voice Emotion']}")
+    if face_emotion == 'Happy' and voice_emotion in ['Happy', 'Calm']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Sad' and voice_emotion in ['Sad', 'Calm']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Angry' and voice_emotion in ['Angry', 'Fear']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Fear' and voice_emotion in ['Fear', 'Surprise']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Surprise' and voice_emotion in ['Surprise', 'Happy']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Disgust' and voice_emotion in ['Disgust', 'Angry']:
+        st.write("Both face and voice are consistent and positive.")
+    elif face_emotion == 'Neutral' and voice_emotion in ['Neutral', 'Calm']:
+        st.write("Both face and voice are consistent and positive.")
     else:
-        st.warning("Please upload both image and audio files.")
+        st.write("Face and voice emotions do not align well or are not consistent.")
+
+# Streamlit app
+def main():
+    st.title("Emotion Analysis")
+
+    image_path = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'])
+    audio_path = st.file_uploader("Upload Audio", type=['wav'])
+
+    if st.button("Process"):
+        if image_path is not None and audio_path is not None:
+            process_image_and_audio(image_path, audio_path)
+        else:
+            st.write("Please upload both image and audio files.")
+
+if __name__ == "__main__":
+    main()
+
+
+!streamlit run /usr/local/lib/python3.10/dist-packages/colab_kernel_launcher.py [ARGUMENTS]
