@@ -4,3 +4,4 @@ numpy
 pickle-mixin
 opencv-python
 streamlit
+pip install opencv-python
