@@ -1,4 +1,3 @@
-import zipfile
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -8,9 +7,16 @@ import numpy as np
 import librosa
 import pickle
 
+# Paths to the models and other resources
+FACE_MODEL_PATH = '/Users/haykkhachatryan/Desktop/AUA/AUA 8/Capstone/Face Recognition/Model/face_recognition.h5'
+VOICE_MODEL_JSON_PATH = '/Users/haykkhachatryan/Desktop/AUA/AUA 8/Capstone/Speech Recognition/Model/CNN_model.json'
+VOICE_MODEL_WEIGHTS_PATH = '/Users/haykkhachatryan/Desktop/AUA/AUA 8/Capstone/Speech Recognition/Model/CNN_model_weights.h5'
+ENCODER_PATH = '/Users/haykkhachatryan/Desktop/AUA/AUA 8/Capstone/Speech Recognition/Model/encoder2.pickle'
+SCALER_PATH = '/Users/haykkhachatryan/Desktop/AUA/AUA 8/Capstone/Speech Recognition/Model/scaler2.pickle'
+
 # Load and prepare the face recognition model
 def load_face_model():
-    model = load_model('models/face_recognition.h5', compile=False)
+    model = load_model(FACE_MODEL_PATH, compile=False)
     model.compile(Adamax(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
     return model
 
@@ -81,8 +87,8 @@ def process_image_and_audio(image_path, audio_path):
     face_emotion = predict_emotion(image_path, face_model)
     st.write(f"Detected Face Emotion: {face_emotion}")
 
-    voice_model = load_voice_model('models/CNN_model.json', 'models/CNN_model_weights.h5')
-    scaler2 = load_pickle('models/scaler2.pickle')
+    voice_model = load_voice_model(VOICE_MODEL_JSON_PATH, VOICE_MODEL_WEIGHTS_PATH)
+    scaler2 = load_pickle(SCALER_PATH)
 
     voice_emotion = voice_prediction(voice_model, audio_path, scaler2)
     st.write(f"Detected Voice Emotion: {voice_emotion}")
