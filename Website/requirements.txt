@@ -2,5 +2,5 @@ tensorflow
 librosa
 numpy
 pickle-mixin
-opencv-python
+Pillow
 streamlit
