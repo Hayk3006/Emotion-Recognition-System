@@ -13,6 +13,10 @@ def load_voice_model(json_path, weights_path):
     loaded_model.load_weights(weights_path)
     return loaded_model
 
+# Load the face recognition model from an .h5 file
+def load_face_model(h5_path):
+    return tf.keras.models.load_model(h5_path)
+
 # Load data using pickle (for scalers and encoders)
 def load_pickle(path):
     with open(path, 'rb') as f:
@@ -24,7 +28,7 @@ def zcr(data, frame_length, hop_length):
     return np.squeeze(zcr)
 
 def rmse(data, frame_length=2048, hop_length=512):
-    rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=frame_length)
+    rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=hop_length)
     return np.squeeze(rmse)
 
 def mfcc(data, sr, frame_length=2048, hop_length=512, flatten=True):
@@ -61,9 +65,14 @@ def flip_image_pillow(image_path):
     flipped_image = ImageOps.mirror(image)  # Horizontal flip
     return flipped_image
 
+# Placeholder function to predict face emotion (replace with actual implementation)
+def predict_emotion(image_path, model):
+    # Placeholder implementation - replace with your actual prediction logic
+    return "Happy"
+
 # Process image and audio paths
 def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path, audio_path):
-    face_emotion = predict_emotion(image_path, face_emotion_model)  # Ensure this function is implemented
+    face_emotion = predict_emotion(image_path, face_emotion_model)
     voice_emotion = voice_prediction(voice_model, audio_path, scaler)
 
     result = {
@@ -76,10 +85,10 @@ def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path,
 st.title("Emotion Detection from Image and Audio")
 st.header("Upload your image and audio files")
 
-# Load models (update these paths as needed)
-face_model = load_face_model()  # Ensure this function is implemented or replace it with your model loading function
-voice_model = load_voice_model('path/to/voice_model.json', 'path/to/voice_model_weights.h5')
-scaler2 = load_pickle('path/to/scaler.pickle')
+# Load models and scaler
+face_model = load_face_model('/content/drive/MyDrive/face_recognition.h5')
+voice_model = load_voice_model('/content/drive/MyDrive/CNN_model.json', '/content/drive/MyDrive/CNN_model_weights.h5')
+scaler2 = load_pickle('/content/drive/MyDrive/scaler2.pickle')
 
 uploaded_image = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 uploaded_audio = st.file_uploader("Choose an audio file", type=["wav", "mp3", "flac"])
