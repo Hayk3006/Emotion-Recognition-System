@@ -4,7 +4,6 @@ import librosa
 import numpy as np
 import pickle
 import cv2
-from base64 import b64decode
 
 # Load the voice recognition model from JSON file
 def load_voice_model(json_path, weights_path):
@@ -28,7 +27,7 @@ def rmse(data, frame_length=2048, hop_length=512):
     rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=hop_length)
     return np.squeeze(rmse)
 
-def mfcc(data, sr, frame_length=2048, hop_length=512, flatten: bool = True):
+def mfcc(data, sr, frame_length=2048, hop_length=512, flatten=True):
     mfccs = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=20, hop_length=hop_length, n_fft=frame_length)
     return np.squeeze(mfccs.T) if not flatten else np.ravel(mfccs.T)
 
@@ -58,7 +57,7 @@ def voice_prediction(model, audio_path, scaler):
 
 # Process image and audio paths
 def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path, audio_path):
-    face_emotion = predict_emotion(image_path, face_emotion_model)
+    face_emotion = predict_emotion(image_path, face_emotion_model)  # Ensure this function is implemented
     voice_emotion = voice_prediction(voice_model, audio_path, scaler)
 
     result = {
@@ -71,10 +70,10 @@ def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path,
 st.title("Emotion Detection from Image and Audio")
 st.header("Upload your image and audio files")
 
-# Load models
-face_model = load_face_model()
-voice_model = load_voice_model('path_to_json_model', 'path_to_model_weights')
-scaler2 = load_pickle('path_to_scaler.pickle')
+# Load models (update these paths as needed)
+face_model = load_face_model()  # Ensure this function is implemented or replace it with your model loading function
+voice_model = load_voice_model('path/to/voice_model.json', 'path/to/voice_model_weights.h5')
+scaler2 = load_pickle('path/to/scaler.pickle')
 
 uploaded_image = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
 uploaded_audio = st.file_uploader("Choose an audio file", type=["wav", "mp3", "flac"])
