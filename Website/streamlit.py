@@ -1,6 +1,4 @@
 # streamlit_app.py
-pip install soundfile
-
 import streamlit as st
 import numpy as np
 import soundfile as sf
