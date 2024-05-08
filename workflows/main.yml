@@ -1,0 +1,36 @@
+name: Install Dependencies and Run Streamlit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'  # Adjust to your desired Python version
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Streamlit Tests (Optional)
+        run: |
+          # Add commands here if you have a test script for Streamlit or models
+          python -m unittest test_script.py
+
+      - name: Deploy (Optional)
+        run: |
+          # Add deployment steps here if you want to deploy automatically
