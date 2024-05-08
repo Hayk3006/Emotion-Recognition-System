@@ -3,7 +3,7 @@ import tensorflow as tf
 import librosa
 import numpy as np
 import pickle
-import cv2
+from PIL import Image, ImageOps
 
 # Load the voice recognition model from JSON file
 def load_voice_model(json_path, weights_path):
@@ -24,7 +24,7 @@ def zcr(data, frame_length, hop_length):
     return np.squeeze(zcr)
 
 def rmse(data, frame_length=2048, hop_length=512):
-    rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=hop_length)
+    rmse = librosa.feature.rms(y=data, frame_length=frame_length, hop_length=frame_length)
     return np.squeeze(rmse)
 
 def mfcc(data, sr, frame_length=2048, hop_length=512, flatten=True):
@@ -54,6 +54,12 @@ def voice_prediction(model, audio_path, scaler):
     y_pred = np.argmax(predictions, axis=1)
     emotions = {0: 'Neutral', 1: 'Calm', 2: 'Happy', 3: 'Sad', 4: 'Angry', 5: 'Fear', 6: 'Disgust', 7: 'Surprise'}
     return emotions[y_pred[0]]
+
+# Load and flip image using Pillow
+def flip_image_pillow(image_path):
+    image = Image.open(image_path)
+    flipped_image = ImageOps.mirror(image)  # Horizontal flip
+    return flipped_image
 
 # Process image and audio paths
 def process_image_and_audio(face_emotion_model, voice_model, scaler, image_path, audio_path):
@@ -87,6 +93,10 @@ if st.button("Analyze Emotions"):
         audio_path = f"temp_{uploaded_audio.name}"
         with open(audio_path, "wb") as f:
             f.write(uploaded_audio.read())
+
+        # Optionally, flip the uploaded image horizontally using Pillow
+        flipped_image = flip_image_pillow(image_path)
+        flipped_image.save(image_path)
 
         # Process emotions
         results = process_image_and_audio(face_model, voice_model, scaler2, image_path, audio_path)
