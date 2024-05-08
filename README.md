@@ -31,9 +31,9 @@ Welcome to the Multimodal Emotion Recognition System! This project combines faci
 ## Results
 
 - **Accuracy**
-- Both facial and voice models demonstrated high accuracy in classifying emotions.
+  - Both facial and voice models demonstrated high accuracy in classifying emotions.
 - **Confusion Matrices**
-- Confusion matrices for both models provide insights into model performance and areas for improvement.
+  - Confusion matrices for both models provide insights into model performance and areas for improvement.
 
 ## Future Work
 
