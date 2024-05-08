@@ -1,4 +1,6 @@
-pydrive
-google-auth
-google-auth-oauthlib
 streamlit
+tensorflow
+Pillow
+librosa
+pickle5
+numpy
