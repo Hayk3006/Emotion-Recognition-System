@@ -8,12 +8,6 @@ import librosa
 import pickle
 import os
 
-path = '/path/to/file/or/folder'
-if os.access(path, os.R_OK):
-    print(f"{path} is readable")
-else:
-    print(f"{path} is not readable")
-
 
 # Load and prepare the face recognition model
 def load_face_model():
