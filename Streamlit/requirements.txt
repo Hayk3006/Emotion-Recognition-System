@@ -1,6 +1,6 @@
 streamlit
 tensorflow
 Pillow
-librosa
-pickle5
 numpy
+librosa
+scikit-learn
